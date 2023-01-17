@@ -16,20 +16,58 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r}
 # Set seed 
 set.seed(2023)
-data <- read.csv("ks-projects-201801")
+
+# Load packages 
+library(survey)
+library(sampling)
+library(dplyr)
+# Load data
+data <- read.csv("ks-projects-201801.csv")
 ```
+Checking the variable names and dimensions of the data
+
+```{r}
+print("Dimension of the data")
+dim(data)
+print("Variable names")
+colnames(data)
+```
+
+The data frame has 15 columns and 378661 rows. 
 
 ## Question 2
 
 ```{r}
-
+# Sample 200 indexes 
+N = nrow(data) # Number of rows 
+n = 5000 # Sample size
+idx = sample(1:N, size = n, replace= FALSE)
+samp = data[idx,]
+data_sample <- data.frame(samp, pw=rep(N/n,n), fpc=rep(N,n))
+svy <- svydesign(id=~0, strata= NULL, weights=~pw,data=data_sample, fpc=~fpc)
+mean_sd <- svymean(~usd_pledged_real, svy)
+mean_sd
 ```
+
+We get a point estimate of the population mean of 8227.9 and standard deviation of 800.5.
 
 ## Question 3
 
 ```{r}
+unique(data$main_category)
+table(data$main_category)
+Ny = c(39874, 63585, 51918, 24602, 30070, 8809, 35231, 10819, 22816, 10913, 28153, 10779, 32569, 3768, 4755)
+fpcs = round(5000*Ny/N)
+idx2 = sampling::strata(data, stratanames = c("main_category"), size = fpcs, method = "srswor")
+samp2 = getdata(data, idx2)
 
+newdata2 <- data.frame(samp2, pw=rep(N/5000, 5001), fpc=c(rep(Ny[1], fpcs[1]), rep(Ny[2], fpcs[2]), rep(Ny[3], fpcs[3]), rep(Ny[4], fpcs[4]), rep(Ny[5], fpcs[5]), rep(Ny[6], fpcs[6]), rep(Ny[7], fpcs[7]), rep(Ny[8], fpcs[8]), rep(Ny[9], fpcs[9]), rep(Ny[10], fpcs[10]), rep(Ny[11], fpcs[11]), rep(Ny[12], fpcs[12]), rep(Ny[13], fpcs[13]), rep(Ny[14], fpcs[14]), rep(Ny[15], fpcs[15])))
+svy2 <- svydesign(id=~1, strata = ~main_category, weights=~pw,data = newdata2, fpc=~fpc)
+mean_sd2 = svymean(~usd_pledged_real, svy2)
+mean_sd2
 ```
+
+
 
 ## Question 4
 
