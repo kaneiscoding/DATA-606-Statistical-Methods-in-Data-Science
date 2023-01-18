@@ -24,6 +24,7 @@ library(dplyr)
 # Load data
 data <- read.csv("ks-projects-201801.csv")
 ```
+
 Checking the variable names and dimensions of the data
 
 ```{r}
@@ -38,7 +39,8 @@ The data frame has 15 columns and 378661 rows.
 ## Question 2
 
 ```{r}
-# Sample 200 indexes 
+set.seed(2023)
+# Sample 5000 indexes 
 N = nrow(data) # Number of rows 
 n = 5000 # Sample size
 idx = sample(1:N, size = n, replace= FALSE)
@@ -49,11 +51,12 @@ mean_sd <- svymean(~usd_pledged_real, svy)
 mean_sd
 ```
 
-We get a point estimate of the population mean of 8227.9 and standard deviation of 800.5.
+Using a simple random sample, we get an estimated  population mean for usd_pledged_real of 8227.9 and standard deviation of 800.5.
 
 ## Question 3
 
 ```{r}
+set.seed(2023)
 unique(data$main_category)
 table(data$main_category)
 Ny = c(39874, 63585, 51918, 24602, 30070, 8809, 35231, 10819, 22816, 10913, 28153, 10779, 32569, 3768, 4755)
@@ -67,19 +70,60 @@ mean_sd2 = svymean(~usd_pledged_real, svy2)
 mean_sd2
 ```
 
-
+Using a stratified sample, we get an estimated population mean for usd_pledged_real of 8567.8 and a standard deviation 844.22.
 
 ## Question 4
 
 ```{r}
+set.seed(2023)
+idx3<-sampling:::cluster(data, clustername = "country", size = 2, method = "srswor")
+clus<-getdata(data, idx3)
+length(unique(data$country))
+clus$pw=rep(23/2,dim(clus)[1])
+unique(clus$country)
+nrow(clus[clus$country == "FR",]) + nrow(clus[clus$country == "LU",])
+clus$fpc = c(rep(23, 3001))
 
+
+scluster<-svydesign(id=~country, weights=~pw, data = clus, fpc=~fpc)
+mean_sd3<-svymean(~usd_pledged_real, scluster)
+mean_sd3
 ```
+
+Using a clustered sample, we get an estimated population mean for usd_pledged_real of 11605 and a standard deviation of 159.73.
 
 ## Question 5
 
 ```{r}
+ratio<-svyratio(~usd_pledged_real, ~usd_goal_real, svy)
+ratio
 
+# Predicted 500k
+pred1<-predict(ratio, 500000)
+# Predicted 1000k
+pred2<-predict(ratio, 1000000)
+# Predicted 2000k
+pred3<-predict(ratio, 2000000)
+
+pred1
+pred2
+pred3
 ```
+
+We get an estimated ratio of 0.1718 with a standard deviation of 0.07391.
+
+**For Goal amount of 500k:**
+Predicted USD Pledged: 85899.85
+Standard Deviation: 36955.69
+
+
+**For Goal amount of 1000k:**
+Predicted USD Pledged: 171799.7
+Standard Deviation: 73911.39
+
+**For Goal amount of 2000k:**
+Predicted USD Pledged: 343599.4
+Standard Deviation: 147822.8
 
 
 **Session Info**
