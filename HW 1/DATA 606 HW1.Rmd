@@ -13,7 +13,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Question 1
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 # Set seed 
 set.seed(2023)
 
@@ -64,7 +64,7 @@ fpcs = round(5000*Ny/N)
 idx2 = sampling::strata(data, stratanames = c("main_category"), size = fpcs, method = "srswor")
 samp2 = getdata(data, idx2)
 
-newdata2 <- data.frame(samp2, pw=rep(N/5000, 5001), fpc=c(rep(Ny[1], fpcs[1]), rep(Ny[2], fpcs[2]), rep(Ny[3], fpcs[3]), rep(Ny[4], fpcs[4]), rep(Ny[5], fpcs[5]), rep(Ny[6], fpcs[6]), rep(Ny[7], fpcs[7]), rep(Ny[8], fpcs[8]), rep(Ny[9], fpcs[9]), rep(Ny[10], fpcs[10]), rep(Ny[11], fpcs[11]), rep(Ny[12], fpcs[12]), rep(Ny[13], fpcs[13]), rep(Ny[14], fpcs[14]), rep(Ny[15], fpcs[15])))
+newdata2 <- data.frame(samp2, pw=1/samp2$Prob, fpc=c(rep(Ny[1], fpcs[1]), rep(Ny[2], fpcs[2]), rep(Ny[3], fpcs[3]), rep(Ny[4], fpcs[4]), rep(Ny[5], fpcs[5]), rep(Ny[6], fpcs[6]), rep(Ny[7], fpcs[7]), rep(Ny[8], fpcs[8]), rep(Ny[9], fpcs[9]), rep(Ny[10], fpcs[10]), rep(Ny[11], fpcs[11]), rep(Ny[12], fpcs[12]), rep(Ny[13], fpcs[13]), rep(Ny[14], fpcs[14]), rep(Ny[15], fpcs[15])))
 svy2 <- svydesign(id=~1, strata = ~main_category, weights=~pw,data = newdata2, fpc=~fpc)
 mean_sd2 = svymean(~usd_pledged_real, svy2)
 mean_sd2
@@ -81,8 +81,8 @@ clus<-getdata(data, idx3)
 length(unique(data$country))
 clus$pw=rep(23/2,dim(clus)[1])
 unique(clus$country)
-nrow(clus[clus$country == "FR",]) + nrow(clus[clus$country == "LU",])
-clus$fpc = c(rep(23, 3001))
+nrow(clus[clus$country == "MX",]) + nrow(clus[clus$country == "SE",])
+clus$fpc = c(rep(23, 3509))
 
 
 scluster<-svydesign(id=~country, weights=~pw, data = clus, fpc=~fpc)
