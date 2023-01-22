@@ -1,9 +1,11 @@
 ---
 title: "DATA 606 HW 1"
-output: 
-  html_document: 
+output:
+  pdf_document:
     toc: yes
-date: "2023-01-10"
+  html_document:
+    toc: yes
+date: '2023-01-10'
 ---
 
 ```{r setup, include=FALSE}
@@ -28,9 +30,7 @@ data <- read.csv("ks-projects-201801.csv")
 Checking the variable names and dimensions of the data
 
 ```{r}
-print("Dimension of the data")
 dim(data)
-print("Variable names")
 colnames(data)
 ```
 
@@ -114,15 +114,18 @@ We get an estimated ratio of 0.1718 with a standard deviation of 0.07391.
 
 **For Goal amount of 500k:**
 Predicted USD Pledged: 85899.85
+
 Standard Deviation: 36955.69
 
 
 **For Goal amount of 1000k:**
 Predicted USD Pledged: 171799.7
+
 Standard Deviation: 73911.39
 
 **For Goal amount of 2000k:**
 Predicted USD Pledged: 343599.4
+
 Standard Deviation: 147822.8
 
 

@@ -1,0 +1,55 @@
+---
+title: "DATA 606 HW 2"
+output: 
+  pdf_document: 
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Question 1
+```{r}
+library(mlbench)
+data(PimaIndiansDiabetes)
+data <- PimaIndiansDiabetes
+dim(data)
+colnames(data)
+summary(data$diabetes) # 2 levels (neg: 500, pos: 268)
+# Check how R dummifies the diuabetes variable
+```
+
+## Question 2
+```{r}
+
+```
+
+## Question 3
+```{r}
+
+```
+
+
+## Question 4
+```{r}
+
+```
+
+
+## Question 5
+```{r}
+
+```
+
+
+## Question 6
+```{r}
+
+```
+
+
+## Question 7
+```{r}
+
+```
