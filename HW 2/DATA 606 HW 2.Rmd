@@ -17,39 +17,125 @@ data <- PimaIndiansDiabetes
 dim(data)
 colnames(data)
 summary(data$diabetes) # 2 levels (neg: 500, pos: 268)
-# Check how R dummifies the diuabetes variable
+# Check how R dummifies the diabetes variable
 ```
 
 ## Question 2
 ```{r}
+library(ISLR)
+library(car)
+set.seed(10)
+train_index <- c(sample(which(data$diabetes == "neg"), 400), sample(which(data$diabetes == "pos"), 200))
 
+train_df <- data[train_index,]
+test_df <- data[-train_index,]
+
+model_fit<-glm(diabetes~pregnant+glucose+pressure+triceps+insulin+mass+pedigree+age, family=binomial, data=train_df)
+summary(model_fit)
 ```
+
+**Pressure** and **Insulin** contribute negatively to the "pos" result.
+
+
+```{r}
+vif(model_fit)
+```
+I do not detect any multicollinearity as all vif values are between 1 and 1.6.
 
 ## Question 3
 ```{r}
-
+prediction <- predict(model_fit, test_df, type="response")
+dia.predict=rep("neg",168)
+dia.predict[prediction>=0.5]="pos"
+actual=test_df$diabetes
+matrix <- table(dia.predict,actual)
+paste("Misclassification Rate:", (matrix[1,2] + matrix[2,1])/sum(matrix)*100,"%")
 ```
 
 
 ## Question 4
-```{r}
 
+Age, Triceps and Insulin are all not statistcally different from 0 using a significance level of 0.
+
+```{r}
+model_fit2<-glm(diabetes~pregnant+glucose+pressure+mass+pedigree, family=binomial, data=train_df)
+summary(model_fit2)
+```
+```{r}
+prediction <- predict(model_fit2, test_df, type="response")
+dia.predict=rep("neg",168)
+dia.predict[prediction>=0.5]="pos"
+actual=test_df$diabetes
+matrix <- table(dia.predict,actual)
+paste("Misclassification Rate:", (matrix[1,2] + matrix[2,1])/sum(matrix)*100,"%")
 ```
 
 
 ## Question 5
 ```{r}
-
+library(MASS)
+lda.fit<-lda(diabetes~pregnant+glucose+pressure+triceps+insulin+mass+pedigree+age, data=train_df)
+lda.pred=predict(lda.fit, test_df)
+matrix <- table(lda.pred$class, test_df$diabetes)
+paste("Misclassification Rate:", (matrix[1,2] + matrix[2,1])/sum(matrix)*100,"%")
 ```
 
 
 ## Question 6
 ```{r}
+combos <- c("Pregnant, Glucose", "Pregnant, Mass", "Pregnant, Pedigree", "Glucose, Mass", "Glucose, Pedigree", "Mass, Pedigree")
+misclass_rates <- c()
 
+lda.fit<-lda(diabetes~pregnant+glucose, data=train_df)
+lda.pred=predict(lda.fit, train_df)
+matrix <- table(lda.pred$class, train_df$diabetes)
+misclass_rates[1] <- (matrix[1,2] + matrix[2,1])/sum(matrix)*100
+
+misclass_rates
+lda.fit<-lda(diabetes~pregnant+mass, data=train_df)
+lda.pred=predict(lda.fit, train_df)
+matrix <- table(lda.pred$class, train_df$diabetes)
+misclass_rates[2] <- (matrix[1,2] + matrix[2,1])/sum(matrix)*100
+
+lda.fit<-lda(diabetes~pregnant+pedigree, data=train_df)
+lda.pred=predict(lda.fit, train_df)
+matrix <- table(lda.pred$class, train_df$diabetes)
+misclass_rates[3] <- (matrix[1,2] + matrix[2,1])/sum(matrix)*100
+
+lda.fit<-lda(diabetes~glucose+mass, data=train_df)
+lda.pred=predict(lda.fit, train_df)
+matrix <- table(lda.pred$class, train_df$diabetes)
+misclass_rates[4] <- (matrix[1,2] + matrix[2,1])/sum(matrix)*100
+
+lda.fit<-lda(diabetes~glucose+pedigree, data=train_df)
+lda.pred=predict(lda.fit, train_df)
+matrix <- table(lda.pred$class, train_df$diabetes)
+misclass_rates[5] <- (matrix[1,2] + matrix[2,1])/sum(matrix)*100
+
+lda.fit<-lda(diabetes~pedigree+mass, data=train_df)
+lda.pred=predict(lda.fit, train_df)
+matrix <- table(lda.pred$class, train_df$diabetes)
+misclass_rates[6] <- (matrix[1,2] + matrix[2,1])/sum(matrix)*100
+
+misclass_combos <- data.frame(combos, misclass_rates)
+misclass_combos
 ```
 
+From the data frame above, the combination of glucose and mass variables create the lowest misclassification rate at 23.5%. 
+
+```{r}
+lda.fit2 <- lda(diabetes~glucose+mass, data=train_df)
+lda.pred=predict(lda.fit2, test_df)
+matrix <- table(lda.pred$class, test_df$diabetes)
+paste("Misclassification Rate:", (matrix[1,2] + matrix[2,1])/sum(matrix)*100,"%")
+```
 
 ## Question 7
 ```{r}
-
+qda.fit<-qda(diabetes~pregnant+glucose+pressure+triceps+insulin+mass+pedigree+age, data=train_df)
+qda.pred=predict(qda.fit, test_df)
+matrix <- table(qda.pred$class, test_df$diabetes)
+paste("Misclassification Rate:", (matrix[1,2] + matrix[2,1])/168*100,"%")
 ```
+
+Using Quadratic Discriminant Analysis increases the misclassification rate.
