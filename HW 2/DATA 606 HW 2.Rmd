@@ -17,15 +17,19 @@ data <- PimaIndiansDiabetes
 dim(data)
 colnames(data)
 summary(data$diabetes) # 2 levels (neg: 500, pos: 268)
-# Check how R dummifies the diabetes variable
+contrasts(data$diabetes)
 ```
+
+R dummifies "neg" as 0 and "pos" as 1.
 
 ## Question 2
 ```{r}
 library(ISLR)
 library(car)
+library(sampling)
 set.seed(10)
 train_index <- c(sample(which(data$diabetes == "neg"), 400), sample(which(data$diabetes == "pos"), 200))
+train_index2 <- sampling:::strata(data, stratanames = c("diabetes"), size=rep(200,400), method = "srswor")
 
 train_df <- data[train_index,]
 test_df <- data[-train_index,]
