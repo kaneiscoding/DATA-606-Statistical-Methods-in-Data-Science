@@ -1,7 +1,10 @@
 ---
 title: "DATA 606 HW 2"
-output: 
-  pdf_document: 
+output:
+  html_document:
+    toc: yes
+    df_print: paged
+  pdf_document:
     toc: yes
 ---
 
@@ -10,7 +13,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ## Question 1
-```{r}
+```{r warning=FALSE}
 library(mlbench)
 data(PimaIndiansDiabetes)
 data <- PimaIndiansDiabetes
@@ -23,16 +26,16 @@ contrasts(data$diabetes)
 R dummifies "neg" as 0 and "pos" as 1.
 
 ## Question 2
-```{r}
+```{r warning=FALSE}
 library(ISLR)
 library(car)
 library(sampling)
 set.seed(10)
-train_index <- c(sample(which(data$diabetes == "neg"), 400), sample(which(data$diabetes == "pos"), 200))
-train_index2 <- sampling:::strata(data, stratanames = c("diabetes"), size=rep(200,400), method = "srswor")
+train_index2 <- sampling:::strata(data, stratanames = c("diabetes"), size=c(200,400), method = "srswor")
 
-train_df <- data[train_index,]
-test_df <- data[-train_index,]
+train_df <- data[train_index2$ID_unit,]
+test_df <- data[-train_index2$ID_unit,]
+
 
 model_fit<-glm(diabetes~pregnant+glucose+pressure+triceps+insulin+mass+pedigree+age, family=binomial, data=train_df)
 summary(model_fit)
@@ -59,10 +62,10 @@ paste("Misclassification Rate:", (matrix[1,2] + matrix[2,1])/sum(matrix)*100,"%"
 
 ## Question 4
 
-Age, Triceps and Insulin are all not statistcally different from 0 using a significance level of 0.
+Triceps and Insulin are not statistcally different from 0 using a significance level of 0.1.
 
 ```{r}
-model_fit2<-glm(diabetes~pregnant+glucose+pressure+mass+pedigree, family=binomial, data=train_df)
+model_fit2<-glm(diabetes~pregnant+glucose+pressure+mass+pedigree+age, family=binomial, data=train_df)
 summary(model_fit2)
 ```
 ```{r}
@@ -76,7 +79,7 @@ paste("Misclassification Rate:", (matrix[1,2] + matrix[2,1])/sum(matrix)*100,"%"
 
 
 ## Question 5
-```{r}
+```{r warning=FALSE}
 library(MASS)
 lda.fit<-lda(diabetes~pregnant+glucose+pressure+triceps+insulin+mass+pedigree+age, data=train_df)
 lda.pred=predict(lda.fit, test_df)
@@ -90,32 +93,37 @@ paste("Misclassification Rate:", (matrix[1,2] + matrix[2,1])/sum(matrix)*100,"%"
 combos <- c("Pregnant, Glucose", "Pregnant, Mass", "Pregnant, Pedigree", "Glucose, Mass", "Glucose, Pedigree", "Mass, Pedigree")
 misclass_rates <- c()
 
+# Variables: Pregnant and Glucose
 lda.fit<-lda(diabetes~pregnant+glucose, data=train_df)
 lda.pred=predict(lda.fit, train_df)
 matrix <- table(lda.pred$class, train_df$diabetes)
 misclass_rates[1] <- (matrix[1,2] + matrix[2,1])/sum(matrix)*100
 
-misclass_rates
+# Variables: Pregnant and Mass
 lda.fit<-lda(diabetes~pregnant+mass, data=train_df)
 lda.pred=predict(lda.fit, train_df)
 matrix <- table(lda.pred$class, train_df$diabetes)
 misclass_rates[2] <- (matrix[1,2] + matrix[2,1])/sum(matrix)*100
 
+# Variables: Pregnant and Pedigree
 lda.fit<-lda(diabetes~pregnant+pedigree, data=train_df)
 lda.pred=predict(lda.fit, train_df)
 matrix <- table(lda.pred$class, train_df$diabetes)
 misclass_rates[3] <- (matrix[1,2] + matrix[2,1])/sum(matrix)*100
 
+# Variables: Glucose and Mass
 lda.fit<-lda(diabetes~glucose+mass, data=train_df)
 lda.pred=predict(lda.fit, train_df)
 matrix <- table(lda.pred$class, train_df$diabetes)
 misclass_rates[4] <- (matrix[1,2] + matrix[2,1])/sum(matrix)*100
 
+# Variables: Glucose and Pedigree
 lda.fit<-lda(diabetes~glucose+pedigree, data=train_df)
 lda.pred=predict(lda.fit, train_df)
 matrix <- table(lda.pred$class, train_df$diabetes)
 misclass_rates[5] <- (matrix[1,2] + matrix[2,1])/sum(matrix)*100
 
+# Variables: Mass and Pedigree
 lda.fit<-lda(diabetes~pedigree+mass, data=train_df)
 lda.pred=predict(lda.fit, train_df)
 matrix <- table(lda.pred$class, train_df$diabetes)
@@ -126,6 +134,15 @@ misclass_combos
 ```
 
 From the data frame above, the combination of glucose and mass variables create the lowest misclassification rate at 23.5%. 
+
+To confirm out results, we will use the partimat function from the klaR package.
+
+```{r warning=FALSE}
+library(klaR)
+partimat(diabetes~pregnant+glucose+mass+pedigree,data=train_df,method="lda")
+```
+
+We get the same result, so we will now fit out model with glucose and mass variables.
 
 ```{r}
 lda.fit2 <- lda(diabetes~glucose+mass, data=train_df)
@@ -139,7 +156,7 @@ paste("Misclassification Rate:", (matrix[1,2] + matrix[2,1])/sum(matrix)*100,"%"
 qda.fit<-qda(diabetes~pregnant+glucose+pressure+triceps+insulin+mass+pedigree+age, data=train_df)
 qda.pred=predict(qda.fit, test_df)
 matrix <- table(qda.pred$class, test_df$diabetes)
-paste("Misclassification Rate:", (matrix[1,2] + matrix[2,1])/168*100,"%")
+paste("Misclassification Rate:", (matrix[1,2] + matrix[2,1])/sum(matrix)*100,"%")
 ```
 
 Using Quadratic Discriminant Analysis increases the misclassification rate.
