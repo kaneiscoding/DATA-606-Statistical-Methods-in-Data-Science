@@ -1,11 +1,11 @@
 ---
 title: "DATA 606 HW 2"
 output:
+  pdf_document:
+    toc: yes
   html_document:
     toc: yes
     df_print: paged
-  pdf_document:
-    toc: yes
 ---
 
 ```{r setup, include=FALSE}

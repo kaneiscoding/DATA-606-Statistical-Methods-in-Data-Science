@@ -1,0 +1,57 @@
+---
+title: "DATA 606 HW 3"
+output: 
+  pdf_document: 
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Regression Problem
+
+## Question 1
+```{r}
+#install.packages("AppliedPredictiveModeling")
+library(AppliedPredictiveModeling)
+data(abalone)
+colnames(abalone)
+dim(abalone)
+```
+
+## Question 2
+```{r}
+
+```
+
+
+## Question 3
+```{r}
+
+```
+
+
+## Question 4
+```{r}
+
+```
+
+# Classification Problem
+
+## Question 5
+```{r}
+
+```
+
+
+## Question 6
+```{r}
+
+```
+
+## Question 7
+```{r}
+
+```
+
